@@ -8,6 +8,9 @@
     <ClCompile Include="CObjectFile.cpp" />
     <ClCompile Include="CProcedure.cpp" />
     <ClCompile Include="CSymbol.cpp" />
+    <ClCompile Include="demangler\cplus-dem.c">
+      <Filter>demangler</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CFileStream.h" />
@@ -17,5 +20,16 @@
     <ClInclude Include="CObjectFile.h" />
     <ClInclude Include="CProcedure.h" />
     <ClInclude Include="CSymbol.h" />
+    <ClInclude Include="demangler\demangle.h">
+      <Filter>demangler</Filter>
+    </ClInclude>
+    <ClInclude Include="demangler\ansidecl.h">
+      <Filter>demangler</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="demangler">
+      <UniqueIdentifier>{e7d538f2-5b1d-41c8-829b-a7d10310a5ee}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

@@ -1,6 +1,7 @@
 #pragma once
 #include "CFileStream.h"
 #include "CProcedure.h"
+#include "CSymbol.h"
 
 enum class Language : int
 {
@@ -67,5 +68,7 @@ public:
 
 	const char* GetName(CFileStream& f, unsigned int section_local_strings_offset);
 	CProcedure* GetProcedure(CFileStream& f, unsigned int procedures_offset, int index);
-	void Dump(CFileStream& f, unsigned int section_local_strings_offset, unsigned int procedures_offset);
+	CSymbol* GetSymbol(CFileStream& f, unsigned int section_local_symbols_offset, int index);
+	void Dump(CFileStream& f, unsigned int section_local_strings_offset,
+		unsigned int procedures_offset, unsigned int section_local_symbols_offset);
 };

@@ -26,9 +26,13 @@ CObjectFile* CMDebugSection::GetObjectFile(CFileStream& f, int index)
 void CMDebugSection::Dump(CFileStream& f)
 {
 	//dump all
+//#ifndef _DEBUG
 	for (int i = 0; i < nobjectfiles; i++)
+//#else
+//	for (int i = 50; i < 51; i++)
+//#endif
 	{
 		CObjectFile* obj = GetObjectFile(f, i);
-		obj->Dump(f, localstrings_offset, procedures_offset);
+		obj->Dump(f, localstrings_offset, procedures_offset, localsymbols_offset);
 	}
 }
