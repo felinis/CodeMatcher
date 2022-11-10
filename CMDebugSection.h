@@ -43,8 +43,11 @@ class CMDebugSection
 	unsigned int externalsymbols_offset;	//shared symbols in the whole program
 public:
 	bool Load(CFileStream& f);
-	
-	CObjectFile* GetObjectFile(CFileStream& f, int index);
 	void Dump(CFileStream& f);
+
+	const CObjectFile& GetObjectFile(CFileStream& f, int index) const;
+	const CObjectFile* GetObjectFile(CFileStream& f, const char* source_file_name) const;
+
+	bool Compare(CFileStream& f, const CMDebugSection& other) const;
 };
 

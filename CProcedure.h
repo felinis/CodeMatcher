@@ -21,11 +21,11 @@ class CProcedure
 	int higherLineNumber;
 	int cb_line_offset;
 public:
-	bool Load(CFileStream& f);
-
 	const char* GetName(CFileStream& f, unsigned int section_local_symbols_offset,
-		unsigned int file_symbols_offset, unsigned int section_local_strings_offset);
-	unsigned int GetProcedureOffset();
+		unsigned int file_symbols_offset, unsigned int section_local_strings_offset) const;
+	unsigned int GetProcedureOffset() const;
 	void Dump(CFileStream& f, unsigned int section_local_symbols_offset,
 		unsigned int file_symbols_offset, unsigned int section_local_strings_offset);
+	bool Compare(CFileStream& f, const CProcedure& other, unsigned int section_local_symbols_offset,
+		unsigned int file_symbols_offset, unsigned int section_local_strings_offset) const;
 };

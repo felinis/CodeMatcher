@@ -5,7 +5,7 @@
 //	Purpose: allows to read a file using a memory mapping,
 //	which is faster than reading the file using multiple fread calls.
 //
-//	(C)2022 Alan Moczulski
+//	(C)2022 fenik0
 //================================
 
 #include "CFileStream.h"
@@ -59,7 +59,7 @@ void CFileStream::GetPointer(void** out, unsigned int numBytes)
 	Advance(numBytes);
 }
 
-void* CFileStream::GetDataAt(unsigned int offset)
+void* CFileStream::GetDataAt(unsigned int offset) const
 {
 	return (void*)(mOriginalPointer + offset);
 }

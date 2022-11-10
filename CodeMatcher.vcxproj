@@ -127,6 +127,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CCompiler.cpp" />
+    <ClCompile Include="CDebugElfFile.cpp" />
     <ClCompile Include="CElfFile.cpp" />
     <ClCompile Include="CFileStreamNT.cpp" />
     <ClCompile Include="CMDebugSection.cpp" />
@@ -137,6 +139,8 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CCompiler.h" />
+    <ClInclude Include="CDebugElfFile.h" />
     <ClInclude Include="CElfFile.h" />
     <ClInclude Include="CFileStream.h" />
     <ClInclude Include="CMDebugSection.h" />

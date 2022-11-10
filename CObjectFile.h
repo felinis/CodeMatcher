@@ -63,12 +63,12 @@ class CObjectFile
 	int cbLine;
 	
 public:
-	//TODO: remove
-	bool Load(CFileStream& f);
-
-	const char* GetName(CFileStream& f, unsigned int section_local_strings_offset);
-	CProcedure* GetProcedure(CFileStream& f, unsigned int procedures_offset, int index);
-	CSymbol* GetSymbol(CFileStream& f, unsigned int section_local_symbols_offset, int index);
+	const char* GetName(CFileStream& f, unsigned int section_local_strings_offset) const;
+	const CProcedure& GetProcedure(CFileStream& f, unsigned int procedures_offset, int index) const;
+	const CSymbol& GetSymbol(CFileStream& f, unsigned int section_local_symbols_offset, int index) const;
 	void Dump(CFileStream& f, unsigned int section_local_strings_offset,
-		unsigned int procedures_offset, unsigned int section_local_symbols_offset);
+		unsigned int procedures_offset, unsigned int section_local_symbols_offset) const;
+
+	bool Compare(CFileStream& f, const CObjectFile& other, unsigned int section_local_strings_offset,
+		unsigned int procedures_offset, unsigned int section_local_symbols_offset) const;
 };

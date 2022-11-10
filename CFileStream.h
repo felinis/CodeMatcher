@@ -21,7 +21,7 @@ public:
 
 	void Read(void* out, unsigned int numBytes);
 	void GetPointer(void** out, unsigned int numBytes);
-	void* GetDataAt(unsigned int offset);
+	void* GetDataAt(unsigned int offset) const;
 	void Advance(unsigned int numBytes);
 	float GetAdvancement();
 

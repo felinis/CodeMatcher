@@ -11,6 +11,8 @@
     <ClCompile Include="demangler\cplus-dem.c">
       <Filter>demangler</Filter>
     </ClCompile>
+    <ClCompile Include="CCompiler.cpp" />
+    <ClCompile Include="CDebugElfFile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CFileStream.h" />
@@ -26,6 +28,8 @@
     <ClInclude Include="demangler\ansidecl.h">
       <Filter>demangler</Filter>
     </ClInclude>
+    <ClInclude Include="CCompiler.h" />
+    <ClInclude Include="CDebugElfFile.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="demangler">
