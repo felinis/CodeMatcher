@@ -16,7 +16,7 @@ enum class ProgramMode
 	DUMP,		//the program is used to dump the debug contents of the ELF file
 	COMPILE		//the program is used to compile an existing source tree and match its code with the ELF file
 };
-static ProgramMode s_program_mode = ProgramMode::DUMP; //dump by default
+static ProgramMode s_program_mode = ProgramMode::COMPILE; //dump by default
 
 int main(int argc, char* argv[])
 {
@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
 
 	const char* elf_file_name = argv[1];
 #else
-	const char* elf_file_name = "C:\\Reversing\\mw_mdebug_symbols\\sly_proto.elf";
+	const char* elf_file_name = "C:\\SLY_TREE\\sly_proto.elf";
 #endif
 
 	const char* date = __DATE__;

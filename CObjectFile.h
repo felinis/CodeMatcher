@@ -63,12 +63,16 @@ class CObjectFile
 	int cbLine;
 	
 public:
-	const char* GetName(CFileStream& f, unsigned int section_local_strings_offset) const;
-	const CProcedure& GetProcedure(CFileStream& f, unsigned int procedures_offset, int index) const;
+	const char* GetName(const CFileStream& f, unsigned int section_local_strings_offset) const;
+	const CProcedure& GetProcedure(const CFileStream& f, unsigned int procedures_offset, int index) const;
+	const CProcedure* GetProcedure(const CFileStream& f, unsigned int procedures_offset,
+		const char* procedure_name, unsigned int section_local_symbols_offset,
+		unsigned int file_symbols_offset, unsigned int section_local_strings_offset) const;
 	const CSymbol& GetSymbol(CFileStream& f, unsigned int section_local_symbols_offset, int index) const;
 	void Dump(CFileStream& f, unsigned int section_local_strings_offset,
 		unsigned int procedures_offset, unsigned int section_local_symbols_offset) const;
 
-	bool Compare(CFileStream& f, const CObjectFile& other, unsigned int section_local_strings_offset,
-		unsigned int procedures_offset, unsigned int section_local_symbols_offset) const;
+	bool Compare(const CFileStream& f, const CObjectFile& other, const CFileStream& other_f,
+		unsigned int section_local_strings_offset, unsigned int procedures_offset, unsigned int section_local_symbols_offset,
+		unsigned int other_section_local_strings_offset, unsigned int other_proceduers_offset, unsigned int other_section_local_symbols_offset) const;
 };

@@ -1,15 +1,38 @@
 #include "CObjectFile.h"
 #include <stdio.h>
 #include <unordered_set>
+#include <assert.h>
 
-const char* CObjectFile::GetName(CFileStream& f, unsigned int section_local_strings_offset) const
+const char* CObjectFile::GetName(const CFileStream& f, unsigned int section_local_strings_offset) const
 {
 	return (char*)f.GetDataAt(section_local_strings_offset + nameIndex + localStringsOffset);
 }
 
-const CProcedure& CObjectFile::GetProcedure(CFileStream& f, unsigned int procedures_offset, int index) const
+const CProcedure& CObjectFile::GetProcedure(const CFileStream& f, unsigned int procedures_offset, int index) const
 {
 	return *(CProcedure*)f.GetDataAt(procedures_offset + sizeof(CProcedure) * (procedures_first_index + index));
+}
+
+const CProcedure* CObjectFile::GetProcedure(const CFileStream& f, unsigned int procedures_offset,
+	const char* procedure_name, unsigned int section_local_symbols_offset,
+	unsigned int file_symbols_offset, unsigned int section_local_strings_offset) const
+{
+	CProcedure* procedures = (CProcedure*)f.GetDataAt(procedures_offset);
+
+	//iterate through the procedures and find the one with the matching name
+	for (int i = 0; i < nprocedures; i++)
+	{
+		const CProcedure& procedure = procedures[procedures_first_index + i];
+		const char* current_procedure_name = procedure.GetName(f, section_local_symbols_offset, file_symbols_offset, section_local_strings_offset);
+		if (strcmp(procedure_name, current_procedure_name) == 0)
+		{
+			//found it
+			return &procedure;
+		}
+	}
+
+	//not found
+	return nullptr;
 }
 
 const CSymbol& CObjectFile::GetSymbol(CFileStream& f, unsigned int section_local_symbols_offset, int index) const
@@ -66,15 +89,29 @@ void CObjectFile::Dump(CFileStream& f, unsigned int section_local_strings_offset
 		printf("\t#include \"%s\"\n", include_file);
 }
 
-bool CObjectFile::Compare(CFileStream& f, const CObjectFile& other, unsigned int section_local_strings_offset,
-	unsigned int procedures_offset, unsigned int section_local_symbols_offset) const
+bool CObjectFile::Compare(const CFileStream& f, const CObjectFile& other, const CFileStream& other_f,
+	unsigned int section_local_strings_offset, unsigned int procedures_offset, unsigned int section_local_symbols_offset,
+	unsigned int other_section_local_strings_offset, unsigned int other_proceduers_offset, unsigned int other_section_local_symbols_offset) const
 {
-	//compare every procedure
+	//for every procedure of this CObjectFile
 	for (unsigned short i = 0; i < nprocedures; i++)
 	{
-		const CProcedure& original_proc = GetProcedure(f, procedures_offset, i);
-		const CProcedure& other_proc = other.GetProcedure(f, procedures_offset, i);
+		const CProcedure& proc = GetProcedure(f, procedures_offset, i);
+		
+		//HACKHACK: may not exist, the actual solution is to parse the CSymbols and find the SymbolType::END for that procedure, which will contain its size.
+		const CProcedure& next_proc = GetProcedure(f, procedures_offset, i + 1);
+		assert(&next_proc); //TEMPORARY!!!
 
-		return original_proc.Compare(f, other_proc, section_local_symbols_offset, symbolsOffset, section_local_strings_offset);
+		const char* procedure_name = proc.GetName(f, section_local_symbols_offset, symbolsOffset, section_local_strings_offset);
+		unsigned int procedure_size = next_proc.GetProcedureOffset() - proc.GetProcedureOffset();
+
+		//try to find the procedure with the same name in the other CObjectFile
+		const CProcedure* other_proc = other.GetProcedure(other_f, other_proceduers_offset, procedure_name, other_section_local_symbols_offset, other.symbolsOffset, other_section_local_strings_offset);
+		if (other_proc)
+			proc.Compare(f, *other_proc, procedure_size, section_local_symbols_offset, symbolsOffset, section_local_strings_offset); //if there is, compare the two procedures
+		else
+			printf("Procedure '%s' has not been decompiled yet\n", procedure_name); //if there is not, inform the user
 	}
+
+	return true;
 }

@@ -67,7 +67,7 @@ class CSymbol
 	unsigned int reserved : 1;
 	unsigned int indexSymbolOrAux : 20;
 public:
-	const char* GetName(CFileStream& f, unsigned int section_local_strings_offset) const;
+	const char* GetName(const CFileStream& f, unsigned int section_local_strings_offset) const;
 	unsigned int GetValue() const;
 	SymbolType GetType() const;
 	const char* GetNamedType() const;

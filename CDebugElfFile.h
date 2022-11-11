@@ -12,5 +12,5 @@ public:
 	bool Load(const char* file_name);
 	void Dump();
 
-	bool operator==(const CDebugElfFile& other);
+	bool operator==(const CDebugElfFile& other) const;
 };

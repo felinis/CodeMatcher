@@ -45,9 +45,9 @@ public:
 	bool Load(CFileStream& f);
 	void Dump(CFileStream& f);
 
-	const CObjectFile& GetObjectFile(CFileStream& f, int index) const;
-	const CObjectFile* GetObjectFile(CFileStream& f, const char* source_file_name) const;
+	const CObjectFile& GetObjectFile(const CFileStream& f, int index) const;
+	const CObjectFile* GetObjectFile(const CFileStream& f, const char* source_file_name) const;
 
-	bool Compare(CFileStream& f, const CMDebugSection& other) const;
+	bool Compare(const CFileStream& f, const CMDebugSection& other, const CFileStream& other_f) const;
 };
 

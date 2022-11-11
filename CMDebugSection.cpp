@@ -33,12 +33,12 @@ void CMDebugSection::Dump(CFileStream& f)
 	}
 }
 
-const CObjectFile& CMDebugSection::GetObjectFile(CFileStream& f, int index) const
+const CObjectFile& CMDebugSection::GetObjectFile(const CFileStream& f, int index) const
 {
 	return *(CObjectFile*)f.GetDataAt(objectfiles_offset + sizeof(CObjectFile) * index);
 }
 
-const CObjectFile* CMDebugSection::GetObjectFile(CFileStream& f, const char* source_file_name) const
+const CObjectFile* CMDebugSection::GetObjectFile(const CFileStream& f, const char* source_file_name) const
 {
 	CObjectFile* object_files = (CObjectFile*)f.GetDataAt(objectfiles_offset);
 
@@ -58,9 +58,9 @@ const CObjectFile* CMDebugSection::GetObjectFile(CFileStream& f, const char* sou
 	return nullptr;
 }
 
-bool CMDebugSection::Compare(CFileStream& f, const CMDebugSection& other) const
+bool CMDebugSection::Compare(const CFileStream& f, const CMDebugSection& other, const CFileStream& other_f) const
 {
-	//compare every object file
+#if 0
 	for (int i = 0; i < nobjectfiles; i++)
 	{
 		//find the corresponding object file
@@ -68,14 +68,23 @@ bool CMDebugSection::Compare(CFileStream& f, const CMDebugSection& other) const
 		const char* original_object_file_name = original_object_file.GetName(f, localstrings_offset);
 		
 		//try to find the other object file, it must have the same name
-		const CObjectFile* candidate_object_file = other.GetObjectFile(f, original_object_file_name);
-		if (candidate_object_file == nullptr)
+		const CObjectFile* candidate_object_file = other.GetObjectFile(other_f, original_object_file_name);
+		if (candidate_object_file)
 		{
-			printf("Warning: Object file '%s' missing from the source tree. Skipping.\n", original_object_file_name);
-			return false;
+			original_object_file.Compare(f, *candidate_object_file, localstrings_offset, procedures_offset, localsymbols_offset);
+			break;
 		}
-		
-		if (!original_object_file.Compare(f, *candidate_object_file, localstrings_offset, procedures_offset, localsymbols_offset))
-			return false;
+
+		printf("Warning: Object file '%s' missing from the source tree. Skipping.\n", original_object_file_name);
 	}
+#else
+	const char* object_file_name = "mat.c"; //TEMP! pass the name from CCompiler as a parameter!
+	const CObjectFile* original_object_file = GetObjectFile(f, object_file_name); //get the mat.c object file from the ELF
+	assert(original_object_file);
+	const CObjectFile& compiled_object_file = other.GetObjectFile(other_f, 0); //get the mat.c object file from the .mdebug
+
+	original_object_file->Compare(f, compiled_object_file, other_f, localstrings_offset, procedures_offset, localsymbols_offset,
+		other.localstrings_offset, other.procedures_offset, other.localsymbols_offset);
+#endif
+	return true;
 }

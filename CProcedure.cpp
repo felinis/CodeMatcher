@@ -4,7 +4,7 @@
 #include <assert.h>
 #include <string.h>
 
-const char* CProcedure::GetName(CFileStream& f, unsigned int section_local_symbols_offset, unsigned int file_symbols_offset, unsigned int section_local_strings_offset) const
+const char* CProcedure::GetName(const CFileStream& f, unsigned int section_local_symbols_offset, unsigned int file_symbols_offset, unsigned int section_local_strings_offset) const
 {
 	const CSymbol& symbol = *(CSymbol*)f.GetDataAt(section_local_symbols_offset + (file_symbols_offset + localSymbolsOffset) * sizeof(CSymbol));
 	
@@ -28,14 +28,18 @@ void CProcedure::Dump(CFileStream& f, unsigned int section_local_symbols_offset,
 	);
 }
 
-bool CProcedure::Compare(CFileStream& f, const CProcedure& other, unsigned int section_local_symbols_offset, unsigned int file_symbols_offset, unsigned int section_local_strings_offset) const
+bool CProcedure::Compare(const CFileStream& f, const CProcedure& other, unsigned int procedure_size, unsigned int section_local_symbols_offset, unsigned int file_symbols_offset, unsigned int section_local_strings_offset) const
 {
-	//compare the names
-	const char* original_name = GetName(f, section_local_symbols_offset, file_symbols_offset, section_local_strings_offset);
-	const char* other_name = other.GetName(f, section_local_symbols_offset, file_symbols_offset, section_local_strings_offset);
-	if (strcmp(original_name, other_name) != 0)
+	//compare the opcodes
+	int offset = memcmp(f.GetDataAt(procedure_offset), f.GetDataAt(other.procedure_offset), procedure_size);
+	if (offset == 0)
 	{
-		printf("Procedure name mismatch: '%s' vs '%s'\n", original_name, other_name);
+		printf("Procedure '%s' IS MATCHING :)\n", GetName(f, section_local_symbols_offset, file_symbols_offset, section_local_strings_offset));
+		return true;
+	}
+	else
+	{
+		printf("Procedure '%s' IS NOT MATCHING :(, different code at offset %d\n", GetName(f, section_local_symbols_offset, file_symbols_offset, section_local_strings_offset), offset);
 		return false;
 	}
 }

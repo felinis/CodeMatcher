@@ -53,7 +53,7 @@ void CDebugElfFile::Dump()
 //===
 //	Compares two ELF files' procedures.
 //===
-bool CDebugElfFile::operator==(const CDebugElfFile& object_file)
+bool CDebugElfFile::operator==(const CDebugElfFile& object_file) const
 {
-	return m_mdebug_section->Compare(m_f, *object_file.m_mdebug_section);
+	return m_mdebug_section->Compare(m_f, *object_file.m_mdebug_section, object_file.m_f);
 }

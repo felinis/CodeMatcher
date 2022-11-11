@@ -7,7 +7,7 @@ extern "C"
 #include <malloc.h>
 #include <string.h>
 
-const char* CSymbol::GetName(CFileStream& f, unsigned int section_local_strings_offset) const
+const char* CSymbol::GetName(const CFileStream& f, unsigned int section_local_strings_offset) const
 {
 	return (char*)f.GetDataAt(section_local_strings_offset + stringIndex);
 }
