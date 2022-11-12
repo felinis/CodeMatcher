@@ -3,51 +3,83 @@
 #include <string.h>
 #include <assert.h>
 
-constexpr short MDEBUG_MAGIC = 0x7009;
 
-bool CMDebugSection::Load(CFileStream& f)
+//===
+//	Load the MDebug section from the file stream.
+//===
+bool CMDebugSection::Load(
+	CFileStream& f,
+	MDebugHeader* data,
+	unsigned int text_section_offset,
+	unsigned int entry_point_virtual_address)
 {
-	//validate
-	if (magic != MDEBUG_MAGIC)
+	//save the mdebug data for later use
+	m_data = data;
+
+	//validate the mdebug header magic
+	constexpr short MDEBUG_MAGIC = 0x7009;
+	if (m_data->magic != MDEBUG_MAGIC)
 	{
-		printf("Invalid .mdebug magic.\n");
+		printf("Invalid mdebug magic.\n");
 		return false;
 	}
 
-	//parse all the files
+	//parse all the object files
+	for (unsigned int i = 0; i < m_data->nobjectfiles; i++)
+	{
+		//get the object file header
+		ObjectFileHeader* object_file_header = (ObjectFileHeader*)f.GetDataAt(m_data->objectfiles_offset + i * sizeof(ObjectFileHeader));
+		if (!object_file_header)
+		{
+			printf("Failed to get object file header.\n");
+			return false;
+		}
+
+		//create a new object file instance and load it
+		CObjectFile object_file(f);
+		if (!object_file.Load(
+			object_file_header,
+			data->localsymbols_offset,
+			data->procedures_offset,
+			data->localstrings_offset,
+			text_section_offset,
+			entry_point_virtual_address))
+		{
+			printf("Failed to load object file.\n");
+			return false;
+		}
+
+		//add it to the cache, it will be useful for later
+		m_object_files.push_back(object_file);
+	}
 
 	return true;
 }
 
+//===
+//	Dump the MDebug section to stdout.
+//===
 void CMDebugSection::Dump(CFileStream& f)
 {
-	//dump all
-#ifndef _DEBUG
-	for (int i = 0; i < nobjectfiles; i++)
-#else
-	for (int i = 70; i < 75; i++)
-#endif
+	//dump all the object files
+#ifdef _DEBUG
+	for (int i = 105; i < 106; i++)
 	{
-		const CObjectFile& object_file = GetObjectFile(f, i);
-		object_file.Dump(f, localstrings_offset, procedures_offset, localsymbols_offset);
+		const CObjectFile& object_file = m_object_files[i];
+#else
+	for (auto object_file : m_object_files)
+	{
+#endif
+		object_file.Dump();
 	}
 }
 
-const CObjectFile& CMDebugSection::GetObjectFile(const CFileStream& f, int index) const
+const CObjectFile* CMDebugSection::FindObjectFile(const char* source_file_name) const
 {
-	return *(CObjectFile*)f.GetDataAt(objectfiles_offset + sizeof(CObjectFile) * index);
-}
-
-const CObjectFile* CMDebugSection::GetObjectFile(const CFileStream& f, const char* source_file_name) const
-{
-	CObjectFile* object_files = (CObjectFile*)f.GetDataAt(objectfiles_offset);
-
 	//iterate through the object files and find the one with the matching source file name
-	for (int i = 0; i < nobjectfiles; i++)
+	for (const CObjectFile& object_file : m_object_files)
 	{
-		const CObjectFile& object_file = object_files[i];
-		const char* object_file_name = object_file.GetName(f, localstrings_offset);
-		if (strcmp(object_file_name, source_file_name) == 0)
+		if (strcmp(object_file.GetName(), source_file_name) == 0)
 		{
 			//found it
 			return &object_file;
@@ -58,7 +90,7 @@ const CObjectFile* CMDebugSection::GetObjectFile(const CFileStream& f, const cha
 	return nullptr;
 }
 
-bool CMDebugSection::Compare(const CFileStream& f, const CMDebugSection& other, const CFileStream& other_f) const
+bool CMDebugSection::MatchObjectFile(const CMDebugSection& other, const char* object_file_name) const
 {
 #if 0
 	for (int i = 0; i < nobjectfiles; i++)
@@ -78,13 +110,17 @@ bool CMDebugSection::Compare(const CFileStream& f, const CMDebugSection& other, 
 		printf("Warning: Object file '%s' missing from the source tree. Skipping.\n", original_object_file_name);
 	}
 #else
-	const char* object_file_name = "mat.c"; //TEMP! pass the name from CCompiler as a parameter!
-	const CObjectFile* original_object_file = GetObjectFile(f, object_file_name); //get the mat.c object file from the ELF
-	assert(original_object_file);
-	const CObjectFile& compiled_object_file = other.GetObjectFile(other_f, 0); //get the mat.c object file from the .mdebug
+	const CObjectFile* original_object_file = FindObjectFile(object_file_name); //get the object file from the ELF
+	if (!original_object_file)
+	{
+		printf("Wrong source file provided '%s', it does not exist in the ELF\n", object_file_name);
+		return false;
+	}
 
-	original_object_file->Compare(f, compiled_object_file, other_f, localstrings_offset, procedures_offset, localsymbols_offset,
-		other.localstrings_offset, other.procedures_offset, other.localsymbols_offset);
+	//get the object file from the .mdebug, it's always the first one since it is the only one
+	const CObjectFile& compiled_object_file = other.m_object_files[0];
+
+	original_object_file->Compare(compiled_object_file);
 #endif
 	return true;
 }

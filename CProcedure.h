@@ -1,7 +1,7 @@
 #pragma once
 #include "CFileStream.h"
 
-class CProcedure
+struct ProcedureHeader
 {
 	unsigned int procedure_offset;
 	int localSymbolsOffset;
@@ -20,12 +20,37 @@ class CProcedure
 	int lowerLineNumber;
 	int higherLineNumber;
 	int cb_line_offset;
+};
+
+class CProcedure
+{
+	const CFileStream& m_f;		//direct access to the file
+	ProcedureHeader* m_data;	//pointer to the procedure header
+
+	char m_name[128];			//the procedure's name
+	unsigned int m_offset;		//where does the procedures's code start
+	unsigned int m_size;		//how big is the procedure's code
+
 public:
-	const char* GetName(const CFileStream& f, unsigned int section_local_symbols_offset,
-		unsigned int file_symbols_offset, unsigned int section_local_strings_offset) const;
+	CProcedure(const CFileStream& f):
+		m_f(f),
+		m_data(nullptr),
+		m_name(),
+		m_offset(0),
+		m_size(0)
+	{}
+
+	bool Load(ProcedureHeader* data,
+		unsigned int section_local_symbols_offset, unsigned int file_symbols_offset, unsigned int section_local_strings_offset);
+
+	void SetProcedureOffset(unsigned int offset);
+	void SetProcedureSize(unsigned int size);
+
+	const char* GetName() const;
 	unsigned int GetProcedureOffset() const;
-	void Dump(CFileStream& f, unsigned int section_local_symbols_offset,
-		unsigned int file_symbols_offset, unsigned int section_local_strings_offset);
-	bool Compare(const CFileStream& f, const CProcedure& other, unsigned int procedure_size, unsigned int section_local_symbols_offset,
-		unsigned int file_symbols_offset, unsigned int section_local_strings_offset) const;
+
+	void Dump() const;
+
+	const char* GetCode() const;
+	bool Compare(const CProcedure& other) const;
 };

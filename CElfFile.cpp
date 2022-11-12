@@ -46,5 +46,37 @@ bool CElfFile::Load(const char* file_name)
 		return false;
 	}
 
+	ElfSectionHeader* sections = GetSectionHeaders();
+	const char* section_names = GetSectionNamesOffset();
+
+	//find the .text section
+	int text_section_index = -1;
+	for (int i = 0; i < m_header->nsections; i++)
+	{
+		ElfSectionHeader& section = sections[i];
+
+		//compare the names
+		const char* name = section_names + section.name_index;
+		if (strcmp(name, ".text") == 0)
+		{
+			//found it
+			text_section_index = i;
+			break;
+		}
+	}
+
+	if (text_section_index == -1)
+	{
+		printf("Could not find the .text section.\n");
+		return false;
+	}
+
+	ElfSectionHeader* text_header = (ElfSectionHeader*)m_f.GetDataAt(
+		m_header->section_headers_offset + text_section_index * sizeof(ElfSectionHeader)
+	);
+
+	m_text_section_offset = text_header->offset;
+	m_entry_point_virtual_offset = m_header->entryPointVirtualAddress;
+
 	return true;
 }

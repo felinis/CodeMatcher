@@ -35,8 +35,11 @@ bool CDebugElfFile::Load(const char* file_name)
 	ElfSectionHeader* mdebug_header = (ElfSectionHeader*)m_f.GetDataAt(
 		m_header->section_headers_offset + mdebug_section_index * sizeof(ElfSectionHeader)
 	);
-	m_mdebug_section = (CMDebugSection*)m_f.GetDataAt(mdebug_header->offset);
-	if (!m_mdebug_section->Load(m_f))
+	if (!m_mdebug_section.Load(
+		m_f,
+		(MDebugHeader*)m_f.GetDataAt(mdebug_header->offset),
+		m_text_section_offset,
+		m_entry_point_virtual_offset))
 	{
 		printf("Failed to load the .mdebug section.\n");
 		return false;
@@ -47,13 +50,13 @@ bool CDebugElfFile::Load(const char* file_name)
 
 void CDebugElfFile::Dump()
 {
-	m_mdebug_section->Dump(m_f);
+	m_mdebug_section.Dump(m_f);
 }
 
 //===
 //	Compares two ELF files' procedures.
 //===
-bool CDebugElfFile::operator==(const CDebugElfFile& object_file) const
+bool CDebugElfFile::MatchObjectFile(const CDebugElfFile& object_file, const char* object_file_name) const
 {
-	return m_mdebug_section->Compare(m_f, *object_file.m_mdebug_section, object_file.m_f);
+	return m_mdebug_section.MatchObjectFile(object_file.m_mdebug_section, object_file_name);
 }

@@ -46,10 +46,15 @@ class CElfFile
 protected:
 	CFileStream m_f;
 	ElfHeader* m_header;
+	unsigned int m_text_section_offset;
+	unsigned int m_entry_point_virtual_offset;
+
 public:
 	CElfFile():
 		m_f(),
-		m_header(nullptr)
+		m_header(nullptr),
+		m_text_section_offset(0),
+		m_entry_point_virtual_offset(0)
 	{}
 
 	ElfSectionHeader* GetSectionHeaders();

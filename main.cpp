@@ -16,7 +16,7 @@ enum class ProgramMode
 	DUMP,		//the program is used to dump the debug contents of the ELF file
 	COMPILE		//the program is used to compile an existing source tree and match its code with the ELF file
 };
-static ProgramMode s_program_mode = ProgramMode::COMPILE; //dump by default
+static ProgramMode s_program_mode = ProgramMode::COMPILE; //compile by default
 
 int main(int argc, char* argv[])
 {
@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
 	const char* elf_file_name = "C:\\SLY_TREE\\sly_proto.elf";
 #endif
 
-	const char* date = __DATE__;
+	const char* date = "12/11/2022"; //not using the __DATA__ macro since I do not like the format
 	printf("=== CodeMatcher - %s ===\n", date);
 
 	//load the debug ELF file

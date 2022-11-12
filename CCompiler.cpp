@@ -38,8 +38,8 @@ static bool Compile(CDebugElfFile& original_elf_file, const char* source_file)
 		return false;
 	}
 
-	//for every procedure in the original ELF, find the same procedure in the compiled object file
-	bool is_matching = (original_elf_file == object_file);
+	//perform the actual matching
+	bool is_matching = original_elf_file.MatchObjectFile(object_file, source_file);
 
 	return true;
 }

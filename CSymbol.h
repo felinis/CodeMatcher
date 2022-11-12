@@ -58,7 +58,7 @@ enum class StorageClass : int
 	MAX = 32
 };
 
-class CSymbol
+struct SymbolHeader
 {
 	unsigned int stringIndex;
 	unsigned int value;
@@ -66,12 +66,28 @@ class CSymbol
 	StorageClass storageClass : 5;
 	unsigned int reserved : 1;
 	unsigned int indexSymbolOrAux : 20;
+};
+
+class CSymbol
+{
+	const CFileStream& m_f;
+	SymbolHeader* m_data;
+	char m_name[128];
+
 public:
-	const char* GetName(const CFileStream& f, unsigned int section_local_strings_offset) const;
+	CSymbol(const CFileStream& f):
+		m_f(f),
+		m_data(nullptr),
+		m_name()
+	{}
+	
+	bool Load(SymbolHeader* data, unsigned int section_local_strings_offset);
+
+	const char* GetName() const;
 	unsigned int GetValue() const;
 	SymbolType GetType() const;
 	const char* GetNamedType() const;
 	StorageClass GetStorageClass() const;
 	unsigned int GetIndex() const;
-	void Dump(CFileStream& f, unsigned int section_local_strings_offset) const;
+	void Dump() const;
 };

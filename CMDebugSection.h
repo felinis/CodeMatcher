@@ -1,8 +1,9 @@
 #pragma once
 #include "CFileStream.h"
 #include "CObjectFile.h"
+#include <vector>
 
-class CMDebugSection
+struct MDebugHeader
 {
 	short magic;
 	short version;
@@ -17,7 +18,7 @@ class CMDebugSection
 	unsigned int nprocedures;
 	unsigned int procedures_offset;
 
-	//these are accessed through the file descriptors
+	//these are accessed through the CObjectFile
 	unsigned int nlocalsymbols;
 	unsigned int localsymbols_offset;
 
@@ -41,13 +42,22 @@ class CMDebugSection
 
 	unsigned int nexternalsymbols;
 	unsigned int externalsymbols_offset;	//shared symbols in the whole program
-public:
-	bool Load(CFileStream& f);
-	void Dump(CFileStream& f);
-
-	const CObjectFile& GetObjectFile(const CFileStream& f, int index) const;
-	const CObjectFile* GetObjectFile(const CFileStream& f, const char* source_file_name) const;
-
-	bool Compare(const CFileStream& f, const CMDebugSection& other, const CFileStream& other_f) const;
 };
 
+class CMDebugSection
+{
+	MDebugHeader* m_data;						//pointer to the mdebug header
+	std::vector<CObjectFile> m_object_files;	//cache of object files
+
+public:
+	CMDebugSection():
+		m_data(nullptr),
+		m_object_files()
+	{}
+
+	bool Load(CFileStream& f, MDebugHeader* data, unsigned int text_section_offset, unsigned int entry_point_virtual_address);
+	void Dump(CFileStream& f);
+
+	const CObjectFile* FindObjectFile(const char* source_file_name) const;
+	bool MatchObjectFile(const CMDebugSection& other, const char* object_file_name) const;
+};

@@ -7,24 +7,52 @@ extern "C"
 #include <malloc.h>
 #include <string.h>
 
-const char* CSymbol::GetName(const CFileStream& f, unsigned int section_local_strings_offset) const
+//===
+//	Takes a mangled function name as input and returns the demangled name.
+//	Examples from the Sly1 prototype:
+//	InitCoin__FP4COIN -> InitCoin(COIN*)
+//	CpdprizeFindSwDprizes__FP2SW3CIDiPP6DPRIZE -> CpdprizeFindSwDprizes(SW *, CID, int, DPRIZE **)
+//===
+static char s_demangled_function_name[256];
+static const char* DemangleName(const char* mangled_function_name)
 {
-	return (char*)f.GetDataAt(section_local_strings_offset + stringIndex);
+	char* demangled_function_name;
+	demangled_function_name = cplus_demangle(mangled_function_name, DMGL_PARAMS | DMGL_ANSI);
+	if (demangled_function_name)
+	{
+		strncpy(s_demangled_function_name, demangled_function_name, sizeof(s_demangled_function_name));
+		free(demangled_function_name);
+		return s_demangled_function_name;
+	}
+
+	return mangled_function_name; //could not demangle, just return the original name
+}
+
+bool CSymbol::Load(SymbolHeader* data, unsigned int section_local_strings_offset)
+{
+	//save the symbol header for later use
+	m_data = data;
+
+	//save the name
+	const char* mangled_name = (char*)m_f.GetDataAt(section_local_strings_offset + data->stringIndex);
+	strncpy(m_name, DemangleName(mangled_name), sizeof(m_name));
+
+	return true;
 }
 
 unsigned int CSymbol::GetValue() const
 {
-	return value;
+	return m_data->value;
 }
 
 SymbolType CSymbol::GetType() const
 {
-	return type;
+	return m_data->type;
 }
 
 const char* CSymbol::GetNamedType() const
 {
-	switch (type)
+	switch (m_data->type)
 	{
 	case SymbolType::GLOBAL:
 		return "GLOBAL";
@@ -57,51 +85,22 @@ const char* CSymbol::GetNamedType() const
 	}
 }
 
-StorageClass CSymbol::GetStorageClass() const
+const char* CSymbol::GetName() const
 {
-	return storageClass;
+	return m_name;
 }
 
 unsigned int CSymbol::GetIndex() const
 {
-	return indexSymbolOrAux;
+	return m_data->indexSymbolOrAux;
 }
 
-//===
-//	Takes a mangled function name as input and returns the demangled name.
-//	Examples from the Sly1 prototype:
-//	InitCoin__FP4COIN -> InitCoin(COIN*)
-//	CloneDprize__FP6DPRIZET0 -> CloneDprize(DPRIZE*, DPRIZE*)
-//	SetDprizeDprizes__FP6DPRIZE7DPRIZES -> SetDprizeDprizes(DPRIZE*, DPRIZES)
-//	CpdprizeFindSwDprizes__FP2SW3CIDiPP6DPRIZE -> CpdprizeFindSwDprizes(SW *, CID, int, DPRIZE **)
-//===
-static char s_demangled_function_name[256];
-static const char* DemangleName(const char* mangled_function_name)
+void CSymbol::Dump() const
 {
-	char* demangled_function_name;
-	demangled_function_name = cplus_demangle(mangled_function_name, DMGL_PARAMS | DMGL_ANSI);
-	if (demangled_function_name)
-	{
-		strncpy(s_demangled_function_name, demangled_function_name, 256);
-		free(demangled_function_name);
-		return s_demangled_function_name;
-	}
-
-	return mangled_function_name;
-}
-
-void CSymbol::Dump(CFileStream& f, unsigned int section_local_strings_offset) const
-{
-	const char* name;
-//	if (type == SymbolType::PROC)
-		name = DemangleName(GetName(f, section_local_strings_offset));
-//	else
-//		name = GetName(f, section_local_strings_offset);
-
 	printf(
 		"\t%s '%s' at offset 0x%x\n",
 		GetNamedType(),
-		name,
-		GetValue()
+		m_name,
+		m_data->value
 	);
 }

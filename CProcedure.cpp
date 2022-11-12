@@ -4,42 +4,81 @@
 #include <assert.h>
 #include <string.h>
 
-const char* CProcedure::GetName(const CFileStream& f, unsigned int section_local_symbols_offset, unsigned int file_symbols_offset, unsigned int section_local_strings_offset) const
+bool CProcedure::Load(ProcedureHeader* data,
+	unsigned int section_local_symbols_offset, unsigned int file_symbols_offset, unsigned int section_local_strings_offset)
 {
-	const CSymbol& symbol = *(CSymbol*)f.GetDataAt(section_local_symbols_offset + (file_symbols_offset + localSymbolsOffset) * sizeof(CSymbol));
-	
-	//make sure that the symbol is a procedure
-	assert(symbol.GetType() == SymbolType::PROC || symbol.GetType() == SymbolType::STATIC_PROC);
+	//save the procedure header for later use
+	m_data = data;
 
-	return symbol.GetName(f, section_local_strings_offset);
+	//parse the symbol
+	SymbolHeader* symbol_header =
+		(SymbolHeader*)m_f.GetDataAt(section_local_symbols_offset + (file_symbols_offset + data->localSymbolsOffset) * sizeof(SymbolHeader));
+	assert(symbol_header->type == SymbolType::PROC || symbol_header->type == SymbolType::STATIC_PROC); //make sure that the symbol is a procedure
+	//TODO
+
+	//load it
+	CSymbol symbol(m_f);
+	if (!symbol.Load(symbol_header, section_local_strings_offset))
+	{
+		printf("Failed to load symbol.\n");
+		return false;
+	}
+	
+	//save the name
+	strncpy(m_name, symbol.GetName(), sizeof(m_name));
+	
+	//we will fill the procedure offset and size later on, we do not have access to that information yet
+
+	return true;
+}
+
+void CProcedure::SetProcedureOffset(unsigned int offset)
+{
+	m_offset = offset;
+}
+
+void CProcedure::SetProcedureSize(unsigned int size)
+{
+	m_size = size;
+}
+
+const char* CProcedure::GetName() const
+{
+	return m_name;
 }
 
 unsigned int CProcedure::GetProcedureOffset() const
 {
-	return procedure_offset;
+	return m_offset;
 }
 
-void CProcedure::Dump(CFileStream& f, unsigned int section_local_symbols_offset, unsigned int file_symbols_offset, unsigned int section_local_strings_offset)
+void CProcedure::Dump() const
 {
 	printf(
 		"\tProcedure '%s' at offset 0x%x\n",
-		GetName(f, section_local_symbols_offset, file_symbols_offset, section_local_strings_offset),
-		GetProcedureOffset()
+		m_name,
+		m_offset
 	);
 }
 
-bool CProcedure::Compare(const CFileStream& f, const CProcedure& other, unsigned int procedure_size, unsigned int section_local_symbols_offset, unsigned int file_symbols_offset, unsigned int section_local_strings_offset) const
+const char* CProcedure::GetCode() const
 {
-	//compare the opcodes
-	int offset = memcmp(f.GetDataAt(procedure_offset), f.GetDataAt(other.procedure_offset), procedure_size);
-	if (offset == 0)
+	return (char*)m_f.GetDataAt(m_offset);
+}
+
+bool CProcedure::Compare(const CProcedure& other) const
+{
+	//compare the two procedure's codes
+	if (m_size == other.m_size)
 	{
-		printf("Procedure '%s' IS MATCHING :)\n", GetName(f, section_local_symbols_offset, file_symbols_offset, section_local_strings_offset));
-		return true;
+		int offset = memcmp(GetCode(), other.GetCode(), m_size);
+		if (offset == 0)
+		{
+			printf("MATCHING - '%s'\n", m_name);
+			return true;
+		}
 	}
-	else
-	{
-		printf("Procedure '%s' IS NOT MATCHING :(, different code at offset %d\n", GetName(f, section_local_symbols_offset, file_symbols_offset, section_local_strings_offset), offset);
-		return false;
-	}
+	
+	printf("NOT MATCHING - '%s'\n", m_name);
+	return false;
 }

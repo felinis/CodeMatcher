@@ -2,6 +2,7 @@
 #include "CFileStream.h"
 #include "CProcedure.h"
 #include "CSymbol.h"
+#include <vector>
 
 enum class Language : int
 {
@@ -23,7 +24,7 @@ enum class OptimisationLevel : int
 	O3
 };
 
-class CObjectFile
+struct ObjectFileHeader
 {
 	unsigned int adr;		/* memory address of beginning of file - adr is incorrect if there are no PDR’s for this FDR.*/
 	unsigned int nameIndex;	/* file name (of source, if known) */
@@ -31,8 +32,8 @@ class CObjectFile
 	unsigned int localStringsOffset;
 	unsigned int stringsSize;
 
-	unsigned int symbolsOffset;
-	unsigned int numSymbols;
+	unsigned int symbols_offset;
+	unsigned int nsymbols;
 
 	unsigned int ilineBase;
 	unsigned int cline;
@@ -61,18 +62,37 @@ class CObjectFile
 	int reserved : 13;
 	int cbLineOffset;
 	int cbLine;
+};
+
+class CObjectFile
+{
+	CFileStream& m_f;
+	ObjectFileHeader* m_data;				//pointer to the data in the file
+	char m_name[128];						//the object file's name (actually the name of the source file)
+	std::vector<CProcedure> m_procedures;	//the procedures contained in this object file
+	std::vector<CSymbol> m_symbols;			//the symbols contained in this object file
 	
 public:
-	const char* GetName(const CFileStream& f, unsigned int section_local_strings_offset) const;
-	const CProcedure& GetProcedure(const CFileStream& f, unsigned int procedures_offset, int index) const;
-	const CProcedure* GetProcedure(const CFileStream& f, unsigned int procedures_offset,
-		const char* procedure_name, unsigned int section_local_symbols_offset,
-		unsigned int file_symbols_offset, unsigned int section_local_strings_offset) const;
-	const CSymbol& GetSymbol(CFileStream& f, unsigned int section_local_symbols_offset, int index) const;
-	void Dump(CFileStream& f, unsigned int section_local_strings_offset,
-		unsigned int procedures_offset, unsigned int section_local_symbols_offset) const;
+	CObjectFile(CFileStream& f):
+		m_f(f),
+		m_data(nullptr),
+		m_name(),
+		m_procedures(),
+		m_symbols()
+	{}
 
-	bool Compare(const CFileStream& f, const CObjectFile& other, const CFileStream& other_f,
-		unsigned int section_local_strings_offset, unsigned int procedures_offset, unsigned int section_local_symbols_offset,
-		unsigned int other_section_local_strings_offset, unsigned int other_proceduers_offset, unsigned int other_section_local_symbols_offset) const;
+	bool Load(
+		ObjectFileHeader* data,
+		unsigned int section_local_symbols_offset,
+		unsigned int procedures_offset,
+		unsigned int section_local_strings_offset,
+		unsigned int text_section_offset,
+		unsigned int entry_point_virtual_address);
+
+	const char* GetName() const;
+	const CProcedure* FindProcedure(const char* name) const;
+
+	void Dump() const;
+
+	bool Compare(const CObjectFile& other) const;
 };

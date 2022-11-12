@@ -7,10 +7,10 @@
 //===
 class CDebugElfFile final: public CElfFile
 {
-	CMDebugSection* m_mdebug_section;
+	CMDebugSection m_mdebug_section;
 public:
 	bool Load(const char* file_name);
 	void Dump();
-
-	bool operator==(const CDebugElfFile& other) const;
+	
+	bool MatchObjectFile(const CDebugElfFile& object_file, const char* object_file_name) const;
 };
