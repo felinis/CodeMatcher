@@ -13,6 +13,7 @@
     </ClCompile>
     <ClCompile Include="CCompiler.cpp" />
     <ClCompile Include="CDebugElfFile.cpp" />
+    <ClCompile Include="Console.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CFileStream.h" />
@@ -30,6 +31,7 @@
     </ClInclude>
     <ClInclude Include="CCompiler.h" />
     <ClInclude Include="CDebugElfFile.h" />
+    <ClInclude Include="Console.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="demangler">

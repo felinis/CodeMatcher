@@ -63,7 +63,7 @@ void CMDebugSection::Dump(CFileStream& f)
 {
 	//dump all the object files
 #ifdef _DEBUG
-	for (int i = 105; i < 106; i++)
+	for (int i = 109; i < 110; i++)
 	{
 		const CObjectFile& object_file = m_object_files[i];
 #else

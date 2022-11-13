@@ -90,6 +90,10 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <ExceptionHandling>false</ExceptionHandling>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -118,6 +122,10 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <ExceptionHandling>false</ExceptionHandling>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -133,6 +141,7 @@
     <ClCompile Include="CFileStreamNT.cpp" />
     <ClCompile Include="CMDebugSection.cpp" />
     <ClCompile Include="CObjectFile.cpp" />
+    <ClCompile Include="Console.cpp" />
     <ClCompile Include="CProcedure.cpp" />
     <ClCompile Include="CSymbol.cpp" />
     <ClCompile Include="demangler\cplus-dem.c" />
@@ -145,6 +154,7 @@
     <ClInclude Include="CFileStream.h" />
     <ClInclude Include="CMDebugSection.h" />
     <ClInclude Include="CObjectFile.h" />
+    <ClInclude Include="Console.h" />
     <ClInclude Include="CProcedure.h" />
     <ClInclude Include="CSymbol.h" />
     <ClInclude Include="demangler\ansidecl.h" />

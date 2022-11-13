@@ -1,6 +1,7 @@
 #include "CObjectFile.h"
 #include <stdio.h>
 #include <unordered_set>
+#include "Console.h"
 
 bool CObjectFile::Load(
 	ObjectFileHeader* data,
@@ -54,6 +55,7 @@ bool CObjectFile::Load(
 			symbol_header->storageClass == StorageClass::TEXT)
 		{
 			//get the procedure offset, also make it start from the beginning of the .text section
+			m_procedures[last_procedure_symbol_index].SetProcedureVirtualOffset(symbol_header->value);
 			unsigned int procedure_offset = text_section_offset + symbol_header->value - entry_point_virtual_address;
 			m_procedures[last_procedure_symbol_index].SetProcedureOffset(procedure_offset);
 			last_procedure_string_index = symbol_header->stringIndex;
@@ -64,6 +66,71 @@ bool CObjectFile::Load(
 		{
 			//this is a procedure's end, get the size from it
 			m_procedures[last_procedure_symbol_index].SetProcedureSize(symbol_header->value);
+
+#ifdef EXPERIMENTAL_PROCEDURES_ARGUMENT_NAMES
+			//skip one symbol
+			i++;
+
+			const char* name = m_procedures[last_procedure_symbol_index].GetName();
+			
+			//count the number of parameters
+			unsigned int nparameters = 0;
+
+			//a procedure does not have parameters if it end with "()" or "(void)"
+			const char* open_parentesis = strchr(name, '(');
+			if (open_parentesis)
+			{
+				bool has_no_parameters = strcmp(open_parentesis, "()") == 0 || strcmp(open_parentesis, "(void)") == 0;
+				if (!has_no_parameters)
+				{
+					//count the number of commas
+					for (unsigned int i = 0; i < strlen(name); i++)
+					{
+						if (name[i] == ',')
+							nparameters++;
+					}
+
+					//add 1 to the number of commas to get the number of parameters
+					nparameters++;
+				}
+
+				printf("Procedure '%s'", name);
+
+				if (!has_no_parameters && symbol_header->value != 0xFFFFFFFF)
+				{
+					printf(" with parameters ");
+
+					//read the arguments' names, these are the symbols that follow the procedure symbol
+					for (int j = i + 1; j <= i + nparameters; j++)
+					{
+						SymbolHeader* ssymbol_header =
+							(SymbolHeader*)m_f.GetDataAt(section_local_symbols_offset + (data->symbols_offset + j) * sizeof(SymbolHeader));
+						CSymbol ssymbol(m_f);
+						if (!ssymbol.Load(ssymbol_header, section_local_strings_offset))
+						{
+							printf("Failed to load symbol.\n");
+							return false;
+						}
+
+						const char* parameter_name = ssymbol.GetName();
+						
+						//put in param_name until ':'
+						char param_name[32] = {};
+						for (unsigned int i = 0; i < strlen(parameter_name); i++)
+						{
+							if (parameter_name[i] == ':')
+								break;
+							param_name[i] = parameter_name[i];
+						}
+
+						//add the parameter name to the procedure
+						m_procedures[last_procedure_symbol_index].AddParameter(param_name);
+					}
+					i += nparameters;
+				}
+			}
+#endif
+
 			last_procedure_symbol_index++;
 		}
 
@@ -108,11 +175,11 @@ void CObjectFile::Dump() const
 	std::unordered_set<const char*> include_files;
 	
 	//print all the procedures
-//	for (unsigned short i = 0; i < nprocedures; i++)
-//	{
-//		CProcedure* proc = GetProcedure(f, procedures_offset, i);
-//		proc->Dump(f, section_local_symbols_offset, symbolsOffset, section_local_strings_offset);
-//	}
+	for (const CProcedure& procedure : m_procedures)
+	{
+		procedure.Dump();
+		printf("\n");
+	}
 	
 	//print all the symbols
 	for (const CSymbol& symbol : m_symbols)
@@ -137,7 +204,11 @@ void CObjectFile::Dump() const
 		{
 			bool is_procedure = (symbol.GetType() == SymbolType::PROC || symbol.GetType() == SymbolType::STATIC_PROC);
 			if (is_procedure)
-				symbol.Dump();
+			{
+//				const char* name = symbol.GetName();
+
+//				printf("Procedure '%s'", name);
+			}
 		}
 	}
 
@@ -152,6 +223,11 @@ bool CObjectFile::Compare(const CObjectFile& other) const
 	for (unsigned int i = 0; i < m_procedures.size(); i++)
 	{
 		const CProcedure& procedure = m_procedures[i];
+		
+		//immediately skip procedures which do not exist in the ELF by default (they have an offset of 0xFFFFFFFF)
+		if (procedure.GetProcedureVirtualOffset() == 0xFFFFFFFF)
+			continue;
+
 		const char* procedure_name = procedure.GetName();
 
 		//try to find the procedure with the same name in the other CObjectFile
@@ -160,7 +236,11 @@ bool CObjectFile::Compare(const CObjectFile& other) const
 		if (other_proc)
 			procedure.Compare(*other_proc);
 		else
-			printf("PLEASE DECOMP - '%s'\n", procedure_name);
+		{
+			Console::SetColor(Color::Orange);
+			printf("PLEASE DECOMP - '%s' at 0x%x\n", procedure_name, procedure.GetProcedureVirtualOffset());
+			Console::ResetColor();
+		}
 	}
 
 	return true;

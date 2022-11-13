@@ -46,7 +46,6 @@ static bool Compile(CDebugElfFile& original_elf_file, const char* source_file)
 
 bool CCompiler::CompileAndMatch(CDebugElfFile& original_elf_file, const char* source_tree_path)
 {
-	//set the current directory to the source tree path
 	SetCurrentDirectory(source_tree_path);
 
 	//find all of the .c source files in the given source tree path

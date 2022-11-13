@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#include "Console.h"
 
 bool CProcedure::Load(ProcedureHeader* data,
 	unsigned int section_local_symbols_offset, unsigned int file_symbols_offset, unsigned int section_local_strings_offset)
@@ -31,10 +32,20 @@ bool CProcedure::Load(ProcedureHeader* data,
 
 	return true;
 }
-
+#ifdef EXPERIMENTAL_PROCEDURES_ARGUMENT_NAMES
+void CProcedure::AddParameter(const char* parameter_name)
+{
+	m_parameters.push_back(parameter_name);
+}
+#endif
 void CProcedure::SetProcedureOffset(unsigned int offset)
 {
 	m_offset = offset;
+}
+
+void CProcedure::SetProcedureVirtualOffset(unsigned int offset)
+{
+	m_virtual_offset = offset;
 }
 
 void CProcedure::SetProcedureSize(unsigned int size)
@@ -47,18 +58,31 @@ const char* CProcedure::GetName() const
 	return m_name;
 }
 
-unsigned int CProcedure::GetProcedureOffset() const
+unsigned int CProcedure::GetProcedureVirtualOffset() const
 {
-	return m_offset;
+	return m_virtual_offset;
 }
 
 void CProcedure::Dump() const
 {
 	printf(
-		"\tProcedure '%s' at offset 0x%x\n",
+		"\tProcedure '%s' at offset 0x%x",
 		m_name,
-		m_offset
+		m_virtual_offset
 	);
+#ifdef EXPERIMENTAL_PROCEDURES_ARGUMENT_NAMES
+	//print parameters
+	if (m_parameters.size() > 0)
+	{
+		printf(" with parameters: ");
+		for (unsigned int i = 0; i < m_parameters.size(); i++)
+		{
+			printf("%s", m_parameters[i].c_str());
+			if (i < m_parameters.size() - 1)
+				printf(", ");
+		}
+	}
+#endif
 }
 
 const char* CProcedure::GetCode() const
@@ -71,14 +95,19 @@ bool CProcedure::Compare(const CProcedure& other) const
 	//compare the two procedure's codes
 	if (m_size == other.m_size)
 	{
-		int offset = memcmp(GetCode(), other.GetCode(), m_size);
+		int offset = memcmp(GetCode() + 8, other.GetCode(), m_size);
 		if (offset == 0)
 		{
+			Console::SetColor(Color::Green);
 			printf("MATCHING - '%s'\n", m_name);
+			Console::ResetColor();
 			return true;
 		}
 	}
-	
+
+	Console::SetColor(Color::Red);
 	printf("NOT MATCHING - '%s'\n", m_name);
+	Console::ResetColor();
+
 	return false;
 }
