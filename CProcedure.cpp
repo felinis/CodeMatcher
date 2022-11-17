@@ -92,10 +92,16 @@ const char* CProcedure::GetCode() const
 
 bool CProcedure::Compare(const CProcedure& other) const
 {
+	//the procedures in sly proto ELF start at "text_section + 8 bytes"
+	constexpr int sly_procedures_offset = 8;
+
 	//compare the two procedure's codes
+	bool same_size = false;
 	if (m_size == other.m_size)
 	{
-		int offset = memcmp(GetCode() + 8, other.GetCode(), m_size);
+		same_size = true;
+
+		int offset = memcmp(GetCode() + sly_procedures_offset, other.GetCode(), m_size);
 		if (offset == 0)
 		{
 			Console::SetColor(Color::Green);
@@ -106,7 +112,11 @@ bool CProcedure::Compare(const CProcedure& other) const
 	}
 
 	Console::SetColor(Color::Red);
-	printf("NOT MATCHING - '%s'\n", m_name);
+	printf("NOT MATCHING - '%s' ", m_name);
+	if (same_size)
+		printf("(same size though)\n");
+	else
+		printf("(of size %u, but needs to be %u)\n", other.m_size, m_size);
 	Console::ResetColor();
 
 	return false;
