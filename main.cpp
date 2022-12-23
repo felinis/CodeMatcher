@@ -60,13 +60,15 @@ int main(int argc, char* argv[])
 	const char* elf_file_name = "C:\\SLY_TREE\\sly_proto.elf";
 #endif
 
-	const char* date = "13/11/2022"; //not using the __DATA__ macro since I do not like the format
-	printf("=== CodeMatcher - %s ===\n", date);
+	printf("=== CodeMatcher 1.1 - 23/12/2022 ===\n");
 
 	//load the debug ELF file
 	CDebugElfFile elf_file;
 	if (!elf_file.Load(elf_file_name))
-		return 3;
+	{
+		printf("Failed to load ELF file: %s\n", elf_file_name);
+		return 4;
+	}
 
 	switch (s_program_mode)
 	{
@@ -78,7 +80,10 @@ int main(int argc, char* argv[])
 		//compile and match the source tree
 		CCompiler compiler;
 		if (!compiler.CompileAndMatch(elf_file, source_tree_path))
-			return 4;
+		{
+			printf("Failed to compile and match the source tree: %s\n", source_tree_path);
+			return 5;
+		}
 		break;
 	}
 
