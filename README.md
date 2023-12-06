@@ -2,24 +2,39 @@
 
 PlayStation 2 MDEBUG (pre-DWARF v1) symbols extraction utility and code function matcher.
 
-The program is ready to use.
-
 
 ## How to use
 
-Guide for Windows.
+To set up the environment, do the following:
 
-- Install the PS2 EE compiler from:
+1. Install the PS2 EE compiler from:
 	https://archive.org/download/SNSystemsProDGPs2/ProDGPs2usrLocalSceFiles.zip
 
-- Extract it to your C:/ drive so that the path looks like: C:/usr/local/...
+2. Extract it to your C:/ drive so that the path looks like: C:/usr/local/...
 
-- Prepare the ELF of the PS2 game you would like to code match, and your source code recreation attempt to match against.
+3. Prepare the ELF of the PS2 game you would like to code match, and your decompiled source code or object files to match against.
 
-- Call `CodeMatcher.exe <elf_file> -compile <source_tree_absolute_path>`
+Now you can use one of the following modes of operation.
 
-CodeMatcher will invoke the PS2 EE compiler on your source tree and match it with the corresponding bits in the ELF file.
-It will show you which functions you got correctly and which ones you got wrong.
+### Compile & compare source tree
+
+`CodeMatcher.exe <elf_file> --compile <source_tree_absolute_path>`
+
+CodeMatcher will invoke the PS2 EE compiler on your source tree and match it with the corresponding functions in the ELF file. It will show you which functions match and which ones don't.
+
+### Match object file
+
+`CodeMatcher.exe <elf_file> --match <object_file>`
+
+CodeMatcher will match the object file with the corresponding functions in the ELF file. It will show you which functions match and which ones don't.
+
+### Dump symbols
+
+`CodeMatcher.exe <elf_file> --dump`
+
+`CodeMatcher.exe <elf_file> --dump > output.txt`
+
+CodeMatcher will dump the symbols from the ELF file to stdout, or to the specified file.
 
 
 ## How to build

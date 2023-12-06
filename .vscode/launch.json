@@ -7,7 +7,7 @@
             "program": "${workspaceFolder}/build/CodeMatcher",
             "args": [
                 "${workspaceFolder}/may_proto.elf",
-                "-match",
+                "--match",
                 "${workspaceFolder}/util.o",
             ],
             "stopAtEntry": false,
