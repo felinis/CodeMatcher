@@ -11,7 +11,7 @@
 #include "CCompiler.h"
 #include "Console.h"
 
-//there are 2 modes of operation of this program:
+//there are 3 modes of operation of this program:
 enum class ProgramMode
 {
 	NONE,		//no mode specified
