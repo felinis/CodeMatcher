@@ -4,6 +4,7 @@ PlayStation 2 MDEBUG (pre-DWARF v1) symbols extraction utility and code function
 
 The program is ready to use.
 
+
 ## How to use
 
 Guide for Windows.
@@ -20,12 +21,13 @@ Guide for Windows.
 CodeMatcher will invoke the PS2 EE compiler on your source tree and match it with the corresponding bits in the ELF file.
 It will show you which functions you got correctly and which ones you got wrong.
 
+
 ## How to build
 
 ### Linux setup
 
 ```bash
-sudo apt install cmake libboost-all-dev libcurses-dev
+sudo apt install cmake libboost-all-dev
 ```
 
 ### Windows setup
@@ -35,7 +37,6 @@ It is recommended to use a package manager like Chocolatey to install the requir
 ```powershell
 choco install cmake boost
 ```
-
 
 ### Building
 
@@ -48,6 +49,7 @@ cd build
 cmake ..
 cmake --build .
 ```
+
 
 ## Images
 

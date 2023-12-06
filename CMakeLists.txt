@@ -3,7 +3,6 @@ project(CodeMatcher)
 
 # Find required packages
 find_package(Boost REQUIRED COMPONENTS filesystem iostreams)
-find_package(Curses REQUIRED)
 
 # Set source files
 file(GLOB SOURCES "src/*.cpp" "src/demangler/*.c")
@@ -16,4 +15,3 @@ target_include_directories(CodeMatcher PRIVATE ${Boost_INCLUDE_DIRS})
 
 # Link libraries
 target_link_libraries(CodeMatcher ${Boost_LIBRARIES})
-target_link_libraries(CodeMatcher ${CURSES_LIBRARIES})

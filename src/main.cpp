@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	//Console::Initialise();
+	Console::Initialise();
 
 	if (strcmp(argv[2], "-dump") == 0)
 		s_program_mode = ProgramMode::DUMP;
@@ -44,7 +44,6 @@ int main(int argc, char* argv[])
 	else
 	{
 		printf("Invalid operation mode: %s\n", argv[2]);
-		Console::Shutdown();
 		return 2;
 	}
 
@@ -54,7 +53,6 @@ int main(int argc, char* argv[])
 		if (argc < 4)
 		{
 			printf("Compile mode requires a source tree to be specified\n");
-			Console::Shutdown();
 			return 3;
 		}
 
@@ -74,7 +72,6 @@ int main(int argc, char* argv[])
 	if (!elf_file.Load(elf_file_name))
 	{
 		printf("Failed to load ELF file: %s\n", elf_file_name);
-		Console::Shutdown();
 		return 4;
 	}
 
@@ -90,7 +87,6 @@ int main(int argc, char* argv[])
 		if (!compiler.CompileAndMatch(elf_file, source_tree_path))
 		{
 			printf("Failed to compile and match the source tree: %s\n", source_tree_path);
-			Console::Shutdown();
 			return 5;
 		}
 		break;
@@ -99,7 +95,6 @@ int main(int argc, char* argv[])
 		if (argc < 4)
 		{
 			printf("Match mode requires an object file to be specified\n");
-			Console::Shutdown();
 			return 6;
 		}
 
@@ -108,7 +103,6 @@ int main(int argc, char* argv[])
 		if (!object_file.Load(object_file_path))
 		{
 			printf("Failed to load object file: %s\n", object_file_path);
-			Console::Shutdown();
 			return 7;
 		}
 
@@ -123,7 +117,6 @@ int main(int argc, char* argv[])
 		if (!elf_file.MatchObjectFile(object_file, object_file_name))
 		{
 			printf("Failed to match object file: %s\n", object_file_name);
-			Console::Shutdown();
 			return 8;
 		}
 
@@ -132,6 +125,5 @@ int main(int argc, char* argv[])
 		break;
 	}
 
-	Console::Shutdown();
 	return 0;
 }

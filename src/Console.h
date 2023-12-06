@@ -11,7 +11,6 @@ enum class Color : int
 namespace Console
 {
 	void Initialise();
-	void Shutdown();
 
 	void SetColor(Color color);
 	void ResetColor();

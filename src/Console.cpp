@@ -1,33 +1,40 @@
 #include "Console.h"
-#include <ncurses.h>
+#include <stdio.h>
+#ifdef WINDOWS
+#include <windows.h>
+#endif
 
 namespace Console
 {
     void Initialise()
     {
-        initscr(); // Initialise curses library
-        start_color(); // Start color functionality
-
-        // Set ncurses width and height to terminal size
-        int width, height;
-        getmaxyx(stdscr, height, width);
-        resizeterm(height, width);
-
-		// Initialize color pairs
-        init_pair(static_cast<int>(Color::White), COLOR_WHITE, COLOR_BLACK);
-        init_pair(static_cast<int>(Color::Red), COLOR_RED, COLOR_BLACK);
-        init_pair(static_cast<int>(Color::Orange), COLOR_YELLOW, COLOR_BLACK); // NCurses doesn't have orange, closest is yellow
-        init_pair(static_cast<int>(Color::Green), COLOR_GREEN, COLOR_BLACK);
+#ifdef WINDOWS
+        // Set console to support ANSI escape codes
+        HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+        DWORD dwMode = 0;
+        GetConsoleMode(hOut, &dwMode);
+        dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+        SetConsoleMode(hOut, dwMode);
+#endif
     }
-
-	void Shutdown()
-	{
-		endwin(); // End curses mode
-	}
 
     void SetColor(Color color)
     {
-        attron(COLOR_PAIR(static_cast<int>(color)));
+        switch (color)
+        {
+        case Color::White:
+            printf("\033[0m");
+            break;
+        case Color::Red:
+            printf("\033[0;31m");
+            break;
+        case Color::Orange:
+            printf("\033[0;33m");
+            break;
+        case Color::Green:
+            printf("\033[0;32m");
+            break;
+        }
     }
 
     void ResetColor()
