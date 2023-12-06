@@ -8,6 +8,11 @@ namespace Console
         initscr(); // Initialise curses library
         start_color(); // Start color functionality
 
+        // Set ncurses width and height to terminal size
+        int width, height;
+        getmaxyx(stdscr, height, width);
+        resizeterm(height, width);
+
 		// Initialize color pairs
         init_pair(static_cast<int>(Color::White), COLOR_WHITE, COLOR_BLACK);
         init_pair(static_cast<int>(Color::Red), COLOR_RED, COLOR_BLACK);

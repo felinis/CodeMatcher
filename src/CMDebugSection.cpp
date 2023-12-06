@@ -74,18 +74,32 @@ void CMDebugSection::Dump(CFileStream& f)
 	}
 }
 
-const CObjectFile* CMDebugSection::FindObjectFile(const char* source_file_name) const
+const CObjectFile* CMDebugSection::FindObjectFile(const char* goal_object_file_name) const
 {
-	//iterate through the object files and find the one with the matching source file name
-	for (const CObjectFile& object_file : m_object_files)
+	//iterate through the object files in the elf and find the one with the matching name
+	for (const CObjectFile& elf_object_file : m_object_files)
 	{
-		if (strcmp(object_file.GetName(), source_file_name) == 0)
+		// strip extension from both strings
+		char* elf_object_file_name_no_ext = strdup(elf_object_file.GetName());
+		char* elf_ext = strrchr(elf_object_file_name_no_ext, '.');
+		if (elf_ext)
+			*elf_ext = '\0';
+
+		char* goal_object_file_name_no_ext = strdup(goal_object_file_name);
+		char* goal_ext = strrchr(goal_object_file_name_no_ext, '.');
+		if (goal_ext)
+			*goal_ext = '\0';
+
+#ifdef _DEBUG
+		printf("Comparing '%s' with '%s'\n", elf_object_file_name_no_ext, goal_object_file_name_no_ext);
+#endif
+		if (strcmp(elf_object_file_name_no_ext, goal_object_file_name_no_ext) == 0)
 		{
 			//found it
-			return &object_file;
+			return &elf_object_file;
 		}
 	}
-	
+
 	//not found
 	return nullptr;
 }
@@ -98,7 +112,7 @@ bool CMDebugSection::MatchObjectFile(const CMDebugSection& other, const char* ob
 		//find the corresponding object file
 		const CObjectFile& original_object_file = GetObjectFile(f, i);
 		const char* original_object_file_name = original_object_file.GetName(f, localstrings_offset);
-		
+
 		//try to find the other object file, it must have the same name
 		const CObjectFile* candidate_object_file = other.GetObjectFile(other_f, original_object_file_name);
 		if (candidate_object_file)
@@ -113,7 +127,7 @@ bool CMDebugSection::MatchObjectFile(const CMDebugSection& other, const char* ob
 	const CObjectFile* original_object_file = FindObjectFile(object_file_name); //get the object file from the ELF
 	if (!original_object_file)
 	{
-		printf("Wrong source file provided '%s', it does not exist in the ELF\n", object_file_name);
+		printf("Could not find object file for '%s' in the ELF\n", object_file_name);
 		return false;
 	}
 

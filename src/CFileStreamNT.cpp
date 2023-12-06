@@ -23,14 +23,13 @@ bool CFileStream::DoesFileExist(const char* file_name)
 
 int CFileStream::Open(const char* file_name)
 {
-    io::mapped_file_source file;
-    file.open(file_name);
+    mFile.open(file_name);
 
-    if (!file.is_open())
+    if (!mFile.is_open())
         return 0;
 
     mSize = fs::file_size(file_name);
-    mOriginalPointer = const_cast<char*>(file.data());
+    mOriginalPointer = (char*)mFile.data();
     mCurrentPointer = mOriginalPointer;
 
     return 1;

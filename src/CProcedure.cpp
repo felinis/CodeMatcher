@@ -24,10 +24,10 @@ bool CProcedure::Load(ProcedureHeader* data,
 		printf("Failed to load symbol.\n");
 		return false;
 	}
-	
+
 	//save the name
 	strncpy(m_name, symbol.GetName(), sizeof(m_name));
-	
+
 	//we will fill the procedure offset and size later on, we do not have access to that information yet
 
 	return true;
@@ -116,7 +116,7 @@ bool CProcedure::Compare(const CProcedure& other) const
 	if (same_size)
 		printf("(same size though)\n");
 	else
-		printf("(of size %u, but needs to be %u)\n", other.m_size, m_size);
+		printf("(size %u, should be %u)\n", other.m_size, m_size);
 	Console::ResetColor();
 
 	return false;

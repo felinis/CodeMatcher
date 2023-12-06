@@ -4,6 +4,12 @@
 *.o
 *.obj
 
+# Compiled Executables
+*.exe
+*.out
+*.app
+*.elf
+
 # CMake files
 build/
 CMakeCache.txt

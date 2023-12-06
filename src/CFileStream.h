@@ -9,8 +9,8 @@ public:
 	CFileStream():
 		mCurrentPointer(nullptr),
 		mOriginalPointer(nullptr),
-		mSize(0),
-		mFile(nullptr)
+		mSize{},
+		mFile{}
 	{}
 	~CFileStream()
 	{

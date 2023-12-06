@@ -14,8 +14,9 @@
 //there are 2 modes of operation of this program:
 enum class ProgramMode
 {
-	DUMP,		//the program is used to dump the debug contents of the ELF file
-	COMPILE		//the program is used to compile an existing source tree and match its code with the ELF file
+	DUMP,		//dump the debug contents of the ELF file
+	COMPILE,	//compile an existing source tree and match its code with the ELF file
+	MATCH		//match an ELF against a single precompiled object file
 };
 static ProgramMode s_program_mode = ProgramMode::COMPILE; //compile by default
 
@@ -28,15 +29,18 @@ int main(int argc, char* argv[])
 		printf("Usage:\n");
 		printf("\tDump mode: %s <elf_file_name> -dump\n", argv[0]);
 		printf("\tCompile mode: %s <elf_file_name> -compile <source_tree>\n", argv[0]);
+		printf("\tMatch mode: %s <elf_file_name> -match <obj_file>\n", argv[0]);
 		return 1;
 	}
 
-	Console::Initialise();
+	//Console::Initialise();
 
 	if (strcmp(argv[2], "-dump") == 0)
 		s_program_mode = ProgramMode::DUMP;
 	else if (strcmp(argv[2], "-compile") == 0)
 		s_program_mode = ProgramMode::COMPILE;
+	else if (strcmp(argv[2], "-match") == 0)
+		s_program_mode = ProgramMode::MATCH;
 	else
 	{
 		printf("Invalid operation mode: %s\n", argv[2]);
@@ -89,6 +93,42 @@ int main(int argc, char* argv[])
 			Console::Shutdown();
 			return 5;
 		}
+		break;
+	case ProgramMode::MATCH:
+		//match the ELF file against a single precompiled object file
+		if (argc < 4)
+		{
+			printf("Match mode requires an object file to be specified\n");
+			Console::Shutdown();
+			return 6;
+		}
+
+		char* object_file_path = argv[3];
+		CDebugElfFile object_file;
+		if (!object_file.Load(object_file_path))
+		{
+			printf("Failed to load object file: %s\n", object_file_path);
+			Console::Shutdown();
+			return 7;
+		}
+
+		//get the object file name
+		char* object_file_name = strrchr(object_file_path, '/');
+		if (!object_file_name)
+			object_file_name = object_file_path;
+		else
+			object_file_name++;
+
+		//match the object file
+		if (!elf_file.MatchObjectFile(object_file, object_file_name))
+		{
+			printf("Failed to match object file: %s\n", object_file_name);
+			Console::Shutdown();
+			return 8;
+		}
+
+		printf("Object file '%s' matched successfully\n", object_file_name);
+
 		break;
 	}
 
