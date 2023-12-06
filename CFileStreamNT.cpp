@@ -9,42 +9,36 @@
 //================================
 
 #include "CFileStream.h"
-#include <Windows.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 
+namespace fs = boost::filesystem;
+namespace io = boost::iostreams;
+
 bool CFileStream::DoesFileExist(const char* file_name)
 {
-	return GetFileAttributes(file_name) != 0;
+    return fs::exists(file_name);
 }
 
 int CFileStream::Open(const char* file_name)
 {
-	mFileStreamHandle = CreateFile(file_name, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (mFileStreamHandle == INVALID_HANDLE_VALUE)
-		return 0;
+    io::mapped_file_source file;
+    file.open(file_name);
 
-	mSize = GetFileSize(mFileStreamHandle, 0);
+    if (!file.is_open())
+        return 0;
 
-	HANDLE hMap = CreateFileMapping(mFileStreamHandle, 0, PAGE_READONLY, 0, 0, 0);
-	if (!hMap)
-		return 0;
+    mSize = fs::file_size(file_name);
+    mOriginalPointer = const_cast<char*>(file.data());
+    mCurrentPointer = mOriginalPointer;
 
-	mOriginalPointer = (char*)MapViewOfFile(hMap, FILE_MAP_READ, 0, 0, 0);
-	if (!mOriginalPointer)
-		return 0;
-
-	mCurrentPointer = mOriginalPointer;
-
-	CloseHandle(hMap);
-	return 1;
+    return 1;
 }
 
 void CFileStream::Close()
 {
-	UnmapViewOfFile(mOriginalPointer);
-	CloseHandle(mFileStreamHandle);
+    mFile.close();
 }
 
 void CFileStream::Read(void* out, unsigned int numBytes)

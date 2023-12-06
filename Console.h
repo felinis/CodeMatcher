@@ -1,6 +1,6 @@
 #pragma once
 
-enum class Color
+enum class Color : int
 {
 	White,
 	Red,
@@ -11,6 +11,7 @@ enum class Color
 namespace Console
 {
 	void Initialise();
+	void Shutdown();
 
 	void SetColor(Color color);
 	void ResetColor();

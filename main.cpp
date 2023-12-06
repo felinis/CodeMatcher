@@ -21,16 +21,17 @@ static ProgramMode s_program_mode = ProgramMode::COMPILE; //compile by default
 
 int main(int argc, char* argv[])
 {
-	Console::Initialise();
-
 #ifndef _DEBUG
 	//make sure the user provided an operation mode
 	if (argc < 2)
 	{
-		printf("Usage:\n\tDump mode: %s <elf_file_name> -dump\n", argv[0]);
+		printf("Usage:\n");
+		printf("\tDump mode: %s <elf_file_name> -dump\n", argv[0]);
 		printf("\tCompile mode: %s <elf_file_name> -compile <source_tree>\n", argv[0]);
 		return 1;
 	}
+
+	Console::Initialise();
 
 	if (strcmp(argv[2], "-dump") == 0)
 		s_program_mode = ProgramMode::DUMP;
@@ -39,6 +40,7 @@ int main(int argc, char* argv[])
 	else
 	{
 		printf("Invalid operation mode: %s\n", argv[2]);
+		Console::Shutdown();
 		return 2;
 	}
 
@@ -48,9 +50,10 @@ int main(int argc, char* argv[])
 		if (argc < 4)
 		{
 			printf("Compile mode requires a source tree to be specified\n");
+			Console::Shutdown();
 			return 3;
 		}
-		
+
 		source_tree_path = argv[3];
 	}
 
@@ -67,6 +70,7 @@ int main(int argc, char* argv[])
 	if (!elf_file.Load(elf_file_name))
 	{
 		printf("Failed to load ELF file: %s\n", elf_file_name);
+		Console::Shutdown();
 		return 4;
 	}
 
@@ -82,10 +86,12 @@ int main(int argc, char* argv[])
 		if (!compiler.CompileAndMatch(elf_file, source_tree_path))
 		{
 			printf("Failed to compile and match the source tree: %s\n", source_tree_path);
+			Console::Shutdown();
 			return 5;
 		}
 		break;
 	}
 
+	Console::Shutdown();
 	return 0;
 }

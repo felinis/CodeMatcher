@@ -1,38 +1,32 @@
 #include "Console.h"
-#define WIN32_LEAN_AND_MEAN
-#define NOUSER
-#define NOGDI
-#include <Windows.h>
+#include <ncurses.h>
 
-static HANDLE s_console_handle;
 namespace Console
 {
-	void Initialise()
+    void Initialise()
+    {
+        initscr(); // Initialise curses library
+        start_color(); // Start color functionality
+
+		// Initialize color pairs
+        init_pair(static_cast<int>(Color::White), COLOR_WHITE, COLOR_BLACK);
+        init_pair(static_cast<int>(Color::Red), COLOR_RED, COLOR_BLACK);
+        init_pair(static_cast<int>(Color::Orange), COLOR_YELLOW, COLOR_BLACK); // NCurses doesn't have orange, closest is yellow
+        init_pair(static_cast<int>(Color::Green), COLOR_GREEN, COLOR_BLACK);
+    }
+
+	void Shutdown()
 	{
-		s_console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
+		endwin(); // End curses mode
 	}
 
-	void SetColor(Color color)
-	{
-		switch (color)
-		{
-		case Color::White:
-			SetConsoleTextAttribute(s_console_handle, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
-			break;
-		case Color::Red:
-			SetConsoleTextAttribute(s_console_handle, FOREGROUND_RED);
-			break;
-		case Color::Orange:
-			SetConsoleTextAttribute(s_console_handle, FOREGROUND_RED | FOREGROUND_GREEN);
-			break;
-		case Color::Green:
-			SetConsoleTextAttribute(s_console_handle, FOREGROUND_GREEN);
-			break;
-		}
-	}
+    void SetColor(Color color)
+    {
+        attron(COLOR_PAIR(static_cast<int>(color)));
+    }
 
-	void ResetColor()
-	{
-		SetColor(Color::White);
-	}
+    void ResetColor()
+    {
+        SetColor(Color::White);
+    }
 }

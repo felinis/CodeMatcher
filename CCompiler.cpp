@@ -2,11 +2,10 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#define WIN32_LEAN_AND_MEAN
-#define NOGDI
-#define NOUSER
-#include <Windows.h>
 #include "CFileStream.h"
+#include <boost/filesystem.hpp>
+
+namespace fs = boost::filesystem;
 
 static bool Compile(CDebugElfFile& original_elf_file, const char* source_file)
 {
@@ -46,29 +45,27 @@ static bool Compile(CDebugElfFile& original_elf_file, const char* source_file)
 
 bool CCompiler::CompileAndMatch(CDebugElfFile& original_elf_file, const char* source_tree_path)
 {
-	SetCurrentDirectory(source_tree_path);
+	//set current directory to the source tree path
+	fs::current_path(source_tree_path);
 
 	//find all of the .c source files in the given source tree path
-	char search_path[128];
-	snprintf(search_path, sizeof(search_path), "%s\\*.c", source_tree_path);
+	fs::path search_path(source_tree_path);
+	search_path /= "*.c";
 
-	WIN32_FIND_DATA find_data;
-	HANDLE find_handle = FindFirstFile(search_path, &find_data);
-	if (find_handle == INVALID_HANDLE_VALUE)
-		return false;
-	
-	//loop through every source file and compile it
-	do
+	//loop through every source file and compiile it
+	fs::directory_iterator end_iter;
+	for (fs::directory_iterator dir_iter(search_path); dir_iter != end_iter; ++dir_iter)
 	{
-		const char* source_file = find_data.cFileName;
-		
-		if (!Compile(original_elf_file, source_file))
+		if (fs::is_regular_file(dir_iter->status()))
 		{
-			FindClose(find_handle);
-			return false;
+			const char* source_file = dir_iter->path().filename().c_str();
+
+			if (!Compile(original_elf_file, source_file))
+			{
+				return false;
+			}
 		}
-	} while (FindNextFile(find_handle, &find_data));
-	FindClose(find_handle);
+	}
 
 	return true;
 }

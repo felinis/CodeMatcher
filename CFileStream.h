@@ -1,5 +1,8 @@
 #pragma once
 
+#include <boost/filesystem.hpp>
+#include <boost/iostreams/device/mapped_file.hpp>
+
 class CFileStream
 {
 public:
@@ -7,7 +10,7 @@ public:
 		mCurrentPointer(nullptr),
 		mOriginalPointer(nullptr),
 		mSize(0),
-		mFileStreamHandle(nullptr)
+		mFile(nullptr)
 	{}
 	~CFileStream()
 	{
@@ -29,6 +32,6 @@ private:
 	char *mCurrentPointer;
 	char *mOriginalPointer;
 	unsigned long mSize;
-	void *mFileStreamHandle;
+	boost::iostreams::mapped_file_source mFile;
 };
 
