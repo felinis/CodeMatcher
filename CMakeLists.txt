@@ -6,7 +6,7 @@ find_package(Boost REQUIRED COMPONENTS filesystem iostreams)
 find_package(Curses REQUIRED)
 
 # Set source files
-file(GLOB SOURCES "*.cpp" "demangler/*.c")
+file(GLOB SOURCES "src/*.cpp" "src/demangler/*.c")
 
 # Add executable
 add_executable(CodeMatcher ${SOURCES})
