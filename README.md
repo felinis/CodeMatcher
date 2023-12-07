@@ -3,36 +3,47 @@
 PlayStation 2 MDEBUG (pre-DWARF v1) symbols extraction utility and code function matcher.
 
 
-## How to use
+## Setup
 
-To set up the environment, do the following:
+Follow these steps to setup the PS2 EE compiler in order to run CodeMatcher.
 
-1. Install the PS2 EE compiler from:
+### Windows
+
+1. Download the PS2 EE compiler from:
 	https://archive.org/download/SNSystemsProDGPs2/ProDGPs2usrLocalSceFiles.zip
 
-2. Extract it to your C:/ drive so that the path looks like: C:/usr/local/...
+2. Extract it to your `C:/` drive so that the path looks like: `C:/usr/local/sce/...`.
 
-3. Prepare the ELF of the PS2 game you would like to code match, and your decompiled source code or object files to match against.
+### Linux
 
-Now you can use one of the following modes of operation.
+1. Download the PS2 EE compiler from https://archive.org/download/SNSystemsProDGPs2/ProDGPs2usrLocalSceFiles.zip
+
+2. Extract it and move the `/usr` dir to `~/.wine/drive_c`. It will not work if you move it to your `/usr` dir.
+
+3. Install `wine` with `sudo apt-get install wine-stable`.
+
+
+## Usage
+
+Prepare the ELF of the PS2 game you would like to code match, and your decompiled source code or object files to match against. Then you can use one of the following modes of operation.
 
 ### Compile & compare source tree
 
-`CodeMatcher.exe <elf_file> --compile <source_tree_absolute_path>`
+`CodeMatcher <elf_file> --compile <source_tree_path>`
 
 CodeMatcher will invoke the PS2 EE compiler on your source tree and match it with the corresponding functions in the ELF file. It will show you which functions match and which ones don't.
 
 ### Match object file
 
-`CodeMatcher.exe <elf_file> --match <object_file>`
+`CodeMatcher <elf_file> --match <object_file>`
 
 CodeMatcher will match the object file with the corresponding functions in the ELF file. It will show you which functions match and which ones don't.
 
 ### Dump symbols
 
-`CodeMatcher.exe <elf_file> --dump`
+`CodeMatcher <elf_file> --dump`
 
-`CodeMatcher.exe <elf_file> --dump > output.txt`
+`CodeMatcher <elf_file> --dump > output.txt`
 
 CodeMatcher will dump the symbols from the ELF file to stdout, or to the specified file.
 
