@@ -39,7 +39,9 @@ static bool CompileSourceFile(CDebugElfFile& original_elf_file, const char* sour
 		return false;
 	}
 
+#ifdef _DEBUG
 	printf("Source file '%s' compiled successfully\n", source_file);
+#endif
 
 	//the object file was compiled successfully, now open it
 	CDebugElfFile object_file; //the object file must also have an mdebug section

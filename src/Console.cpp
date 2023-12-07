@@ -28,7 +28,7 @@ namespace Console
         case Color::Red:
             printf("\033[0;31m");
             break;
-        case Color::Orange:
+        case Color::Yellow:
             printf("\033[0;33m");
             break;
         case Color::Green:

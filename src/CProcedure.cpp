@@ -105,16 +105,16 @@ bool CProcedure::Compare(const CProcedure& other) const
 		if (offset == 0)
 		{
 			Console::SetColor(Color::Green);
-			printf("MATCHING - '%s'\n", m_name);
+			printf("MATCHING -------- '%s'\n", m_name);
 			Console::ResetColor();
 			return true;
 		}
 	}
 
 	Console::SetColor(Color::Red);
-	printf("NOT MATCHING - '%s' ", m_name);
+	printf("NOT MATCHING ---- '%s' ", m_name);
 	if (same_size)
-		printf("(same size though)\n");
+		printf("(same size)\n");
 	else
 		printf("(size %u, should be %u)\n", other.m_size, m_size);
 	Console::ResetColor();

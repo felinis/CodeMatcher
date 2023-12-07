@@ -137,7 +137,9 @@ int main(int argc, char* argv[])
 			return 8;
 		}
 
+#ifdef _DEBUG
 		printf("Object file '%s' matched successfully.\n", object_file_name);
+#endif
 
 		break;
 	}

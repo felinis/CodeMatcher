@@ -1,10 +1,10 @@
 #pragma once
 
-enum class Color : int
+enum class Color
 {
 	White,
 	Red,
-	Orange,
+	Yellow,
 	Green,
 };
 
