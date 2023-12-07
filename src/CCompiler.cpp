@@ -7,20 +7,6 @@
 
 namespace fs = boost::filesystem;
 
-#if 0
-#define SCE "C:\\usr\\local\\sce"
-#define EE 	SCE"\\ee"
-#define IDIR EE"\\gcc\\include\\g++-2"
-#define CC 	EE"\\gcc\\bin\\ee-gcc.exe"
-#endif
-#if 0
-#define SCE "/usr/local/sce"
-#define EE 	SCE"/ee"
-#define IDIR EE"/gcc/include/g++-2"
-#define CC 	"wine " EE"/gcc/bin/ee-gcc"
-#endif
-
-
 #ifdef WINDOWS
 #define SCE "C:\\usr\\local\\sce"
 #define EE 	SCE"\\ee"
@@ -32,7 +18,6 @@ namespace fs = boost::filesystem;
 #define IDIR EE"/gcc/include/g++-2"
 #define CC 	"wine " EE"/gcc/bin/ee-gcc"
 #endif
-
 
 static bool CompileSourceFile(CDebugElfFile& original_elf_file, const char* source_file, const char* include_dir = NULL)
 {
