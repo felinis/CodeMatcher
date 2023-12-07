@@ -7,19 +7,46 @@
 
 namespace fs = boost::filesystem;
 
-static bool Compile(CDebugElfFile& original_elf_file, const char* source_file)
+#if 0
+#define SCE "C:\\usr\\local\\sce"
+#define EE 	SCE"\\ee"
+#define IDIR EE"\\gcc\\include\\g++-2"
+#define CC 	EE"\\gcc\\bin\\ee-gcc.exe"
+#endif
+#if 0
+#define SCE "/usr/local/sce"
+#define EE 	SCE"/ee"
+#define IDIR EE"/gcc/include/g++-2"
+#define CC 	"wine " EE"/gcc/bin/ee-gcc"
+#endif
+
+
+#ifdef WINDOWS
+#define SCE "C:\\usr\\local\\sce"
+#define EE 	SCE"\\ee"
+#define IDIR EE"\\gcc\\include\\g++-2"
+#define CC 	EE"\\gcc\\bin\\ee-gcc.exe"
+#else
+#define SCE "~/.wine/drive_c/usr/local/sce"
+#define EE 	SCE"/ee"
+#define IDIR EE"/gcc/include/g++-2"
+#define CC 	"wine " EE"/gcc/bin/ee-gcc"
+#endif
+
+
+static bool CompileSourceFile(CDebugElfFile& original_elf_file, const char* source_file, const char* include_dir = NULL)
 {
 	//form the compiled object file name like so: temp/file.o
 	char object_file_name[128];
-	snprintf(object_file_name, sizeof(object_file_name), "temp\\%s.o", source_file);
+	snprintf(object_file_name, sizeof(object_file_name), "%s.o", source_file);
 
 	//run mipscc.exe to compile the source file
-	char command_line[256];
+	char command_line[512];
 	//example of compiling a file:
 	//C:\usr\local\sce\ee\gcc\bin\ee-gcc.exe -IC:\usr\local\sce\ee\gcc\include\g++-2 -g -O2 -x c++ -c mat.c -o mat.o
 	snprintf(command_line, sizeof(command_line),
-		"C:\\usr\\local\\sce\\ee\\gcc\\bin\\ee-gcc.exe -IC:\\usr\\local\\sce\\ee\\gcc\\include\\g++-2 -g -O2 -x c++ -c %s -o %s",
-		source_file, object_file_name);
+		CC " -I" IDIR " -I %s -g -O2 -x c++ -c %s -o %s",
+		include_dir, source_file, object_file_name);
 	int code = system(command_line);
 	if (code != 0)
 	{
@@ -50,7 +77,6 @@ bool CCompiler::CompileAndMatch(CDebugElfFile& original_elf_file, const char* so
 
 	//find all of the .c source files in the given source tree path
 	fs::path search_path(source_tree_path);
-	search_path /= "*.c";
 
 	//loop through every source file and compiile it
 	fs::directory_iterator end_iter;
@@ -58,11 +84,17 @@ bool CCompiler::CompileAndMatch(CDebugElfFile& original_elf_file, const char* so
 	{
 		if (fs::is_regular_file(dir_iter->status()))
 		{
+			// Check if the file extension is .c or .cpp
 			const char* source_file = dir_iter->path().filename().c_str();
-
-			if (!Compile(original_elf_file, source_file))
+			const char* extension = strrchr(source_file, '.');
+			if (extension == NULL || (strcmp(extension, ".c") != 0 && strcmp(extension, ".cpp") != 0))
 			{
-				return false;
+				continue;
+			}
+
+			if (!CompileSourceFile(original_elf_file, source_file, source_tree_path))
+			{
+				continue;
 			}
 		}
 	}
