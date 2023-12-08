@@ -49,13 +49,13 @@ enum class StorageClass : int
 	PDATA,
 	FINI,
 	NON_GP,
-	//	VIRTUAL,
-	//	PURE,
-	//	FRIEND,
-	//	CLASS,
-	//	STATIC,
-	//	VIRTUAL_STATIC,
-	MAX = 32
+//	VIRTUAL,
+//	PURE,
+//	FRIEND,
+//	CLASS,
+//	STATIC,
+//	VIRTUAL_STATIC,
+//	MAX = 32
 };
 
 struct SymbolHeader
