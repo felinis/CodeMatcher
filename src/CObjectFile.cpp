@@ -49,7 +49,7 @@ bool CObjectFile::Load(
 		//get the symbol header
 		SymbolHeader* symbol_header =
 			(SymbolHeader*)m_f.GetDataAt(section_local_symbols_offset + (data->symbols_offset + i) * sizeof(SymbolHeader));
-		
+
 		//if this is a procedure symbol, get the procedure offset and size from it
 		if ((symbol_header->type == SymbolType::PROC || symbol_header->type == SymbolType::STATIC_PROC) &&
 			symbol_header->storageClass == StorageClass::TEXT)
@@ -72,7 +72,7 @@ bool CObjectFile::Load(
 			i++;
 
 			const char* name = m_procedures[last_procedure_symbol_index].GetName();
-			
+
 			//count the number of parameters
 			unsigned int nparameters = 0;
 
@@ -113,7 +113,7 @@ bool CObjectFile::Load(
 						}
 
 						const char* parameter_name = ssymbol.GetName();
-						
+
 						//put in param_name until ':'
 						char param_name[32] = {};
 						for (unsigned int i = 0; i < strlen(parameter_name); i++)
@@ -162,7 +162,7 @@ const CProcedure* CObjectFile::FindProcedure(const char* name) const
 		if (strcmp(procedure.GetName(), name) == 0)
 			return &procedure;
 	}
-	
+
 	return nullptr; //not found
 }
 
@@ -173,14 +173,14 @@ void CObjectFile::Dump() const
 	//create a set of include files
 	//we use a set instead of an array because we want to avoid duplicates
 	std::unordered_set<const char*> include_files;
-	
+
 	//print all the procedures
 	for (const CProcedure& procedure : m_procedures)
 	{
 		procedure.Dump();
 		printf("\n");
 	}
-	
+
 	//print all the symbols
 	for (const CSymbol& symbol : m_symbols)
 	{
@@ -219,11 +219,17 @@ void CObjectFile::Dump() const
 
 bool CObjectFile::Compare(const CObjectFile& other) const
 {
+	// print the name of the object file
+	Console::SetColor(Color::White);
+	printf("----------------------------------------------------------------\n");
+	printf("+ Comparing '%s'\n", m_name);
+	printf("----------------------------------------------------------------\n");
+	Console::ResetColor();
 	//for every procedure of this CObjectFile
 	for (unsigned int i = 0; i < m_procedures.size(); i++)
 	{
 		const CProcedure& procedure = m_procedures[i];
-		
+
 		//immediately skip procedures which do not exist in the ELF by default (they have an offset of 0xFFFFFFFF)
 		if (procedure.GetProcedureVirtualOffset() == 0xFFFFFFFF)
 			continue;
@@ -237,8 +243,8 @@ bool CObjectFile::Compare(const CObjectFile& other) const
 			procedure.Compare(*other_proc);
 		else
 		{
-			Console::SetColor(Color::Orange);
-			printf("PLEASE DECOMP - '%s' at 0x%x\n", procedure_name, procedure.GetProcedureVirtualOffset());
+			Console::SetColor(Color::Yellow);
+			printf("PLEASE DECOMP --- '%s' at 0x%x\n", procedure_name, procedure.GetProcedureVirtualOffset());
 			Console::ResetColor();
 		}
 	}
